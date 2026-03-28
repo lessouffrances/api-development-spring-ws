@@ -16,5 +16,4 @@ public class MobileAppWsApplication {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
