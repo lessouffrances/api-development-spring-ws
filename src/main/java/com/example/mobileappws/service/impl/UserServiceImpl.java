@@ -3,6 +3,7 @@ package com.example.mobileappws.service.impl;
 import com.example.mobileappws.UserRepository;
 import com.example.mobileappws.io.entity.UserEntity;
 import com.example.mobileappws.service.UserService;
+import com.example.mobileappws.shared.Utils;
 import com.example.mobileappws.shared.dto.UserDto;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class UserServiceImpl implements UserService  {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    Utils utils;
+
     @Override
     public UserDto createUser(UserDto user) {
         if (userRepository.findByEmail(user.getEmail()) != null)
@@ -22,8 +26,9 @@ public class UserServiceImpl implements UserService  {
         UserEntity userEntity = new UserEntity();
         BeanUtils.copyProperties(user, userEntity);
 
+        String publicUserId = utils.generateUserId(30);
+        userEntity.setUserId(publicUserId);
         userEntity.setEncryptedPassword("test");
-        userEntity.setUserId("testUserId");
 
         UserEntity storedUserDetails = userRepository.save(userEntity);
         UserDto returnValue = new UserDto();
