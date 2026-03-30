@@ -34,11 +34,33 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException
     {
         try {
+            // Step 1: Deserialize the request body
+            // The client sends a POST /login with a JSON body like:
+            // { "email": "a@b.com", "password": "123" }
+            // ObjectMapper reads the raw input stream and maps the JSON fields
+            // into a UserLoginRequestModel object, so we can access creds.getEmail()
+            // and creds.getPassword() as typed Java fields.
             UserLoginRequestModel creds = new ObjectMapper().readValue(req.getInputStream(), UserLoginRequestModel.class);
 
-            return getAuthenticationManager().authenticate(
-                new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(), new ArrayList<>())
-            );
+            // Step 2: Build an authentication token
+            // UsernamePasswordAuthenticationToken is Spring Security's standard
+            // credential container. It wraps the email and password into an object
+            // that the AuthenticationManager understands.
+            // The third argument is an empty list of authorities — at this stage
+            // we are not granting any roles yet, just verifying identity.
+            // Once authenticated, Spring will populate the authorities from UserDetails.
+            UsernamePasswordAuthenticationToken authToken
+                = new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword(), new ArrayList<>());
+
+            // Step 3: Delegate to the AuthenticationManager
+            // AuthenticationManager hands the token to your UserDetailsService,
+            // which loads the user from the DB by email, then compares the
+            // provided password against the BCrypt-hashed password in the DB.
+            // If they match, it returns a fully populated Authentication object.
+            // If they don't match, it throws an AuthenticationException,
+            // which Spring Security catches and returns a 401 Unauthorized response.
+            return getAuthenticationManager().authenticate(authToken);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
