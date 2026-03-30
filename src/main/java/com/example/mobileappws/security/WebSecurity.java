@@ -24,6 +24,9 @@ public class WebSecurity {
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         // configure authenticationManagerBuilder
+        // tells spring framework which service class it should use to load user details from the db
+        // and which encryption object it should use to verify the password in the login form matches
+        // the encrypted password in db
         AuthenticationManagerBuilder authenticationManagerBuilder =
             http.getSharedObject(AuthenticationManagerBuilder.class);
 
