@@ -1,6 +1,7 @@
 package com.example.mobileappws.ui.model.request;
 
-
+// http://localhost:8080/login
+// this api end point will handle login request, which is in the framework
 public class UserLoginRequestModel {
     private String email;
     private String password;
