@@ -48,7 +48,10 @@ public class WebSecurity {
                 .anyRequest().authenticated()
             )
             .authenticationManager(authenticationManager)
-            .addFilter(authenticationFilter);
+            .addFilter(authenticationFilter)
+            .addFilter(new AuthorizationFilter(authenticationManager))
+            .sessionManagement(session
+                -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
