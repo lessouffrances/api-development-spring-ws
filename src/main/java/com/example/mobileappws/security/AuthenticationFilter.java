@@ -83,10 +83,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             .setIssuedAt(Date.from(now))
             .signWith(secretKey, io.jsonwebtoken.SignatureAlgorithm.HS512).compact();
 
+        // add authorization token to header
         UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImpl");
-        UserDto userDto = userService.getUser(userName);
-
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+
+        // add public userId to header
+        UserDto userDto = userService.getUser(userName);
         res.addHeader("UserId", userDto.getUserId());
     }
  }

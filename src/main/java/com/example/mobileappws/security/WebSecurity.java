@@ -36,6 +36,10 @@ public class WebSecurity {
 
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
+        // customize the http://localhost:8080/login
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager);
+        authenticationFilter.setFilterProcessesUrl("/users/login");
+
         http
             .cors(Customizer.withDefaults())
             .csrf(AbstractHttpConfigurer::disable)
@@ -44,7 +48,7 @@ public class WebSecurity {
                 .anyRequest().authenticated()
             )
             .authenticationManager(authenticationManager)
-            .addFilter(new AuthenticationFilter(authenticationManager));
+            .addFilter(authenticationFilter);
 
         return http.build();
     }
