@@ -18,43 +18,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 
-/**
- * AuthorizationFilter runs on every incoming HTTP request AFTER the user has already logged in.
- *
- * Its job is to:
- *   1. Check if the request contains a valid JWT token in the Authorization header.
- *   2. If valid, extract the user's identity from the token and register it with
- *      Spring Security so the request is treated as authenticated.
- *   3. If missing or invalid, pass the request through unauthenticated — Spring Security
- *      will then reject it with 403 if the endpoint requires authentication.
- *
- * This is different from AuthenticationFilter, which handles the initial login (issuing the token).
- * This filter handles all subsequent requests (verifying the token).
- *
- * Extends BasicAuthenticationFilter so that Spring Security automatically includes
- * it in the filter chain for every request.
- */
+
 public class AuthorizationFilter extends BasicAuthenticationFilter {
 
-    /**
-     * Constructor — passes the AuthenticationManager up to the parent class.
-     * The AuthenticationManager is required by BasicAuthenticationFilter internally.
-     * It is provided by Spring Security and injected via the SecurityConfig.
-     */
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
 
-    /**
-     * Called automatically by Spring Security on every incoming HTTP request.
-     *
-     * Think of this as the "gatekeeper" — it checks the request's Authorization header
-     * before allowing it to reach any controller.
-     *
-     * @param request  the incoming HTTP request from the client
-     * @param response the outgoing HTTP response to the client
-     * @param chain    the remaining filters to execute after this one
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException {
@@ -89,19 +59,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request, response);
     }
 
-    /**
-     * Parses and validates the JWT token from the request's Authorization header.
-     *
-     * Steps:
-     *   1. Extract the raw token string by stripping the "Bearer " prefix.
-     *   2. Rebuild the same SecretKey that was originally used to SIGN the token.
-     *   3. Use JJWT to verify the token's signature and parse its claims (payload).
-     *   4. Extract the subject (the user's email/username) from the claims.
-     *   5. Return a UsernamePasswordAuthenticationToken representing the authenticated user.
-     *
-     * @param request the incoming HTTP request containing the Authorization header
-     * @return a UsernamePasswordAuthenticationToken if the token is valid, or null if not
-     */
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
 
         // Re-read the Authorization header value, e.g. "Bearer eyJhbGci..."
@@ -117,7 +74,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         // Rebuild the SecretKey using the same secret and algorithm that was used
         // to sign the token in AuthenticationFilter.
         // Base64-encode the raw secret bytes first, then wrap in a SecretKeySpec for HS512.
-        byte[] secretBytes = Base64.getEncoder().encode(SecurityConstants.TOKEN_SECRET.getBytes());
+        byte[] secretBytes = Base64.getEncoder().encode(SecurityConstants.getTokenSecret().getBytes());
         SecretKey secretKey = new SecretKeySpec(secretBytes, io.jsonwebtoken.SignatureAlgorithm.HS512.getJcaName());
 
         // Use JJWT to verify the token's signature and parse its payload (claims).
