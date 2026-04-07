@@ -4,8 +4,7 @@ import com.example.mobileappws.exceptions.UserServiceException;
 import com.example.mobileappws.service.UserService;
 import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.request.UserDetailsRequestModel;
-import com.example.mobileappws.ui.model.response.ErrorMessages;
-import com.example.mobileappws.ui.model.response.UserRest;
+import com.example.mobileappws.ui.model.response.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -65,9 +64,15 @@ public class UserController {
         return returnValue;
     }
 
-    @DeleteMapping
-    public String deleteUser()
+    @DeleteMapping(path="/{id}",
+        produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
+    )
+    public OperationStatus deleteUser(@PathVariable String id)
     {
-        return "delete user was called";
+        OperationStatus returnValue = new OperationStatus();
+        returnValue.setOperationName(RequestOperationName.DELETE.name());
+        userService.deleteUser(id);
+        returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        return returnValue;
     }
 }
