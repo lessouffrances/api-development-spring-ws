@@ -5,7 +5,7 @@ import com.example.mobileappws.exceptions.UserServiceException;
 import com.example.mobileappws.io.entity.UserEntity;
 import com.example.mobileappws.service.UserService;
 import com.example.mobileappws.shared.Utils;
-import com.example.mobileappws.shared.dto.AddressDTO;
+import com.example.mobileappws.shared.dto.AddressDto;
 import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.response.ErrorMessages;
 import org.modelmapper.ModelMapper;
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService  {
 
         // generate public address Id and set it back to the user
         for (int i=0; i<user.getAddresses().size(); i++) {
-            AddressDTO address = user.getAddresses().get(i);
+            AddressDto address = user.getAddresses().get(i);
             address.setUserDetails(user);
             address.setAddressId(utils.generateAddressId(30));
             user.getAddresses().set(i, address);
@@ -78,12 +78,11 @@ public class UserServiceImpl implements UserService  {
         Page<UserEntity> usersPage = userRepository.findAll(pageableRequest);
         List<UserEntity> users = usersPage.getContent();
 
+        ModelMapper modelMapper = new ModelMapper();
         for (UserEntity userEntity : users) {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity, userDto);
+            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
             returnValue.add(userDto);
         }
-
         return returnValue;
     }
 
@@ -102,11 +101,10 @@ public class UserServiceImpl implements UserService  {
 
     public UserDto getUserByUserId(String userId)
     {
-        UserDto returnValue = new UserDto();
+        ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = userRepository.findByUserId(userId);
-
         if (userEntity == null) throw new UsernameNotFoundException(userId);
-        BeanUtils.copyProperties(userEntity, returnValue);
+        UserDto returnValue = modelMapper.map(userEntity, UserDto.class);
         return returnValue;
     }
 

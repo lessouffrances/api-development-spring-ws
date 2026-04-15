@@ -1,6 +1,6 @@
 package com.example.mobileappws.shared.dto;
 
-public class AddressDTO {
+public class AddressDto {
     private long id;
     private String addressId;
     private String city;

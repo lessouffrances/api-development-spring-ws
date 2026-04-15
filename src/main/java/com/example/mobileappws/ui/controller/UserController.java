@@ -26,9 +26,9 @@ public class UserController {
     @GetMapping(path="/{id}", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public UserRest getUser(@PathVariable String id)
     {
-        UserRest returnValue = new UserRest();
+        ModelMapper modelMapper = new ModelMapper();
         UserDto userDto = userService.getUserByUserId(id);
-        BeanUtils.copyProperties(userDto, returnValue);
+        UserRest returnValue = modelMapper.map(userDto, UserRest.class);
         return returnValue;
     }
 
@@ -37,11 +37,12 @@ public class UserController {
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "2") int limit)
     {
+        ModelMapper modelMapper = new ModelMapper();
         List<UserRest> returnValue = new ArrayList<>();
         List<UserDto> users = userService.getUsers(page, limit);
+
         for (UserDto userDto : users) {
-            UserRest userModel = new UserRest();
-            BeanUtils.copyProperties(userDto, userModel);
+            UserRest userModel = modelMapper.map(userDto, UserRest.class);
             returnValue.add(userModel);
         }
         return returnValue;
@@ -75,6 +76,8 @@ public class UserController {
         UserRest returnValue = new UserRest();
 
         if (userDetails.getFirstName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FILED.getErrorMessage());
+        if (userDetails.getLastName().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FILED.getErrorMessage());
+        if (userDetails.getEmail().isEmpty()) throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FILED.getErrorMessage());
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userDetails, userDto);
         UserDto updatedUser = userService.updateUser(id, userDto);
