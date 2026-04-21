@@ -64,12 +64,17 @@ public class UserController {
         produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public CollectionModel<AddressRest> getUserAddresses(@PathVariable String id)
     {
-        List<AddressRest> returnValue = new ArrayList<>();
         List<AddressDto> addressesDto = addressService.getUserAddresses(id);
         ModelMapper modelMapper = new ModelMapper();
 
         Type listType = new TypeToken<List<AddressRest>>() {}.getType();
-        returnValue = modelMapper.map(addressesDto, listType);
+        List<AddressRest> returnValue = modelMapper.map(addressesDto, listType);
+        for (AddressRest addressRest : returnValue) {
+            Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+                    .getUserAddress(addressRest.getAddressId(), id))
+                    .withSelfRel();
+            addressRest.add(selfLink); // AddressRest extends RepresentationModel
+        }
 
         Link userLink = WebMvcLinkBuilder.linkTo(UserController.class).slash(id).withRel("user");
         Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
