@@ -130,4 +130,21 @@ public class UserServiceImpl implements UserService  {
         if (userEntity == null) throw new UserServiceException(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
         userRepository.delete(userEntity);
     }
+
+    @Override
+    public boolean verifyEmailToken(String token) {
+        boolean returnValue = false;
+        UserEntity userEntity = userRepository.findUserByEmailVerification(token);
+
+        if (userEntity != null) {
+            boolean hasTokenExpired = Utils.hasTokenExpired(token);
+            if (!hasTokenExpired) {
+                userEntity.setEmailVerificationToken(null);
+                userEntity.setEmailVerificationStatus(Boolean.TRUE);
+                userRepository.save(userEntity);
+                returnValue = true;
+            }
+        }
+        return returnValue;
+    }
 }

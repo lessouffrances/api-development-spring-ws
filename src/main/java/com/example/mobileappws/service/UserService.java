@@ -1,6 +1,7 @@
 package com.example.mobileappws.service;
 
 import com.example.mobileappws.shared.dto.UserDto;
+import com.example.mobileappws.ui.model.response.OperationStatus;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface UserService extends UserDetailsService {
     UserDto getUserByUserId(String userId);
     UserDto updateUser(String userId, UserDto user);
     void deleteUser(String userId);
+    boolean verifyEmailToken(String token);
 }
