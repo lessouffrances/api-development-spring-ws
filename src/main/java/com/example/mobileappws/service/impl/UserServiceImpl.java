@@ -8,12 +8,14 @@ import com.example.mobileappws.shared.Utils;
 import com.example.mobileappws.shared.dto.AddressDto;
 import com.example.mobileappws.shared.dto.UserDto;
 import com.example.mobileappws.ui.model.response.ErrorMessages;
+import org.jspecify.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -91,14 +93,16 @@ public class UserServiceImpl implements UserService  {
     // UserDetailsService will load the UserDetails by username
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         UserEntity userEntity = userRepository.findByEmail(username);
         if (userEntity == null) throw new UsernameNotFoundException(username);
 
         // User class from spring framework
         // spring will handle the password
         // third param is user's permissions
-        return new User(username, userEntity.getEncryptedPassword(), new ArrayList<>());
+        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
+            userEntity.getEmailVerificationStatus(),
+            true, true, true,
+            new ArrayList<>());
     }
 
     public UserDto getUserByUserId(String userId)

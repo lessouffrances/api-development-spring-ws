@@ -56,10 +56,14 @@ public class Utils {
 
     public static String generateEmailVerificationToken(String userId)
     {
+        SecretKey secretKey = Keys.hmacShaKeyFor(
+            SecurityConstants.getTokenSecret().getBytes(StandardCharsets.UTF_8)
+        );
+
         String token = Jwts.builder()
-            .setSubject(userId)
-            .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-            .signWith(SignatureAlgorithm.HS512, SecurityConstants.getTokenSecret())
+            .subject(userId)
+            .expiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+            .signWith(secretKey)
             .compact();
 
         return token;
